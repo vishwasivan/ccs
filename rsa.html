@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RSA Encryption and Decryption</title>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+</head>
+<body>
+    <h2>RSA Encryption and Decryption</h2>
+
+    <label>Public Key:</label><br>
+    <textarea id="pubkey" rows="5" cols="65" readonly></textarea><br><br>
+
+    <label>Private Key:</label><br>
+    <textarea id="privkey" rows="8" cols="65" readonly></textarea><br><br>
+
+    <button onclick="generateKeys()">Generate RSA Keys</button>
+    <br><br>
+
+    <label>Enter Message:</label><br>
+    <textarea id="input" rows="4" cols="65">This is a test!</textarea><br><br>
+
+    <button onclick="encryptMessage()">Encrypt</button>
+    <button onclick="decryptMessage()">Decrypt</button>
+
+    <h3>Encrypted Message</h3>
+    <textarea id="encrypted" rows="5" cols="65" readonly></textarea>
+
+    <h3>Decrypted Message</h3>
+    <textarea id="decrypted" rows="4" cols="65" readonly></textarea>
+
+    <p id="result"></p>
+
+    <script>
+        var rsa = new JSEncrypt({ default_key_size: 1024 });
+
+        function generateKeys() {
+            if (typeof JSEncrypt === "undefined") {
+                alert("JSEncrypt library failed to load. Check your internet connection.");
+                return;
+            }
+
+            rsa = new JSEncrypt({ default_key_size: 1024 });
+            rsa.getKey();
+
+            document.getElementById("pubkey").value = rsa.getPublicKey();
+            document.getElementById("privkey").value = rsa.getPrivateKey();
+            document.getElementById("encrypted").value = "";
+            document.getElementById("decrypted").value = "";
+            document.getElementById("result").textContent =
+                "RSA key pair generated successfully.";
+        }
+
+        function encryptMessage() {
+            var publicKey = document.getElementById("pubkey").value.trim();
+            var message = document.getElementById("input").value;
+
+            if (!publicKey) {
+                alert("Please generate RSA keys first.");
+                return;
+            }
+
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey(publicKey);
+
+            var encrypted = encrypt.encrypt(message);
+
+            if (encrypted === false) {
+                document.getElementById("result").textContent =
+                    "Encryption failed. The message may be too long for this RSA key.";
+                return;
+            }
+
+            document.getElementById("encrypted").value = encrypted;
+            document.getElementById("decrypted").value = "";
+            document.getElementById("result").textContent =
+                "Message encrypted successfully.";
+        }
+
+        function decryptMessage() {
+            var privateKey = document.getElementById("privkey").value.trim();
+            var encrypted = document.getElementById("encrypted").value.trim();
+
+            if (!privateKey || !encrypted) {
+                alert("Generate keys and encrypt a message first.");
+                return;
+            }
+
+            var decrypt = new JSEncrypt();
+            decrypt.setPrivateKey(privateKey);
+
+            var decrypted = decrypt.decrypt(encrypted);
+
+            if (decrypted === false) {
+                document.getElementById("result").textContent =
+                    "Decryption failed. Check that the keys match.";
+                return;
+            }
+
+            document.getElementById("decrypted").value = decrypted;
+            document.getElementById("result").textContent =
+                decrypted === document.getElementById("input").value
+                ? "Success! Original and decrypted messages match."
+                : "Decryption completed, but the messages do not match.";
+        }
+
+        window.onload = function () {
+            if (typeof JSEncrypt === "undefined") {
+                document.getElementById("result").textContent =
+                    "JSEncrypt failed to load. Check your internet connection.";
+            } else {
+                generateKeys();
+            }
+        };
+    </script>
+</body>
+</html>
