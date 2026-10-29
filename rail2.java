@@ -1,71 +1,41 @@
-import java.util.*;
-
-class RailFenceBasic {
-    String Encryption(String plainText, int depth) {
-        int r = depth, len = plainText.length();
-        int c = (len + depth - 1) / depth;
-        char[][] mat = new char[r][c];
-        int k = 0;
-        String cipherText = "";
-
-        for (int i = 0; i < c; i++) {
-            for (int j = 0; j < r; j++) {
-                if (k < len)
-                    mat[j][i] = plainText.charAt(k++);
-                else
-                    mat[j][i] = 'X';
-            }
-        }
-
-        for (int i = 0; i < r; i++)
-            for (int j = 0; j < c; j++)
-                cipherText += mat[i][j];
-
-        return cipherText;
-    }
-
-    String Decryption(String cipherText, int depth) {
-        int r = depth, len = cipherText.length();
-        int c = len / depth;
-        char[][] mat = new char[r][c];
-        int k = 0;
-        String plainText = "";
-
-        for (int i = 0; i < r; i++)
-            for (int j = 0; j < c; j++)
-                mat[i][j] = cipherText.charAt(k++);
-
-        for (int i = 0; i < c; i++)
-            for (int j = 0; j < r; j++)
-                plainText += mat[j][i];
-
-        return plainText;
-    }
-}
-
 class Main {
     public static void main(String[] args) {
-        RailFenceBasic rf = new RailFenceBasic();
-        Scanner scn = new Scanner(System.in);
+        String s = "WEAREDISCOVERED", enc = "", dec = "";
+        int n = 3, r = 0, d = 1;
+        String[] rail = {"", "", ""};
 
-        System.out.println("Enter plain text:");
-        String plainText = scn.nextLine();
-
-        System.out.println("Enter depth for Encryption:");
-        int depth = scn.nextInt();
-
-        if (depth <= 0) {
-            System.out.println("Depth must be greater than zero.");
-            scn.close();
-            return;
+        for (char c : s.toCharArray()) {
+            rail[r] += c;
+            if (r == 0) d = 1;
+            if (r == n - 1) d = -1;
+            r += d;
         }
 
-        String cipherText = rf.Encryption(plainText, depth);
-        System.out.println("Encrypted text is:\n" + cipherText);
+        for (String x : rail) enc += x;
+        System.out.println("Encrypted: " + enc);
 
-        String decryptedText = rf.Decryption(cipherText, depth);
-        System.out.println("Decrypted text is:\n" + decryptedText);
+        int[] pattern = new int[s.length()];
+        r = 0; d = 1;
+        for (int i = 0; i < s.length(); i++) {
+            pattern[i] = r;
+            if (r == 0) d = 1;
+            if (r == n - 1) d = -1;
+            r += d;
+        }
 
-        scn.close();
+        int[] pos = new int[n];
+        for (int i = 0; i < s.length(); i++) pos[pattern[i]]++;
+
+        String[] rows = new String[n];
+        int start = 0;
+        for (int i = 0; i < n; i++) {
+            rows[i] = enc.substring(start, start + pos[i]);
+            start += pos[i];
+        }
+
+        for (int i = 0; i < s.length(); i++)
+            dec += rows[pattern[i]].charAt(--pos[pattern[i]] + rows[pattern[i]].length());
+
+        System.out.println("Decrypted: " + dec);
     }
 }
