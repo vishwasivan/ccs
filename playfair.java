@@ -1,83 +1,43 @@
-import java.awt.Point;
-
-class PlayfairCipher {
-    private static char[][] charTable;
-    private static Point[] positions;
-
-    private static String prepareText(String s, boolean chgJtoI) {
-        s = s.toUpperCase().replaceAll("[^A-Z]", "");
-        return chgJtoI ? s.replace("J", "I") : s.replace("Q", "");
-    }
-
-    private static void createTbl(String key, boolean chgJtoI) {
-        charTable = new char[5][5];
-        positions = new Point[26];
-
-        String s = prepareText(key + "ABCDEFGHIJKLMNOPQRSTUVWXYZ", chgJtoI);
-
-        for (int i = 0, k = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (positions[c - 'A'] == null) {
-                charTable[k / 5][k % 5] = c;
-                positions[c - 'A'] = new Point(k % 5, k / 5);
-                k++;
-            }
-        }
-    }
-
-    private static String codec(StringBuilder txt, int dir) {
-        for (int i = 0; i < txt.length(); i += 2) {
-            char a = txt.charAt(i), b = txt.charAt(i + 1);
-            int row1 = positions[a - 'A'].y, row2 = positions[b - 'A'].y;
-            int col1 = positions[a - 'A'].x, col2 = positions[b - 'A'].x;
-
-            if (row1 == row2) {
-                col1 = (col1 + dir) % 5;
-                col2 = (col2 + dir) % 5;
-            } else if (col1 == col2) {
-                row1 = (row1 + dir) % 5;
-                row2 = (row2 + dir) % 5;
-            } else {
-                int tmp = col1;
-                col1 = col2;
-                col2 = tmp;
-            }
-
-            txt.setCharAt(i, charTable[row1][col1]);
-            txt.setCharAt(i + 1, charTable[row2][col2]);
-        }
-        return txt.toString();
-    }
-
-    private static String encode(String s) {
-        StringBuilder sb = new StringBuilder(s);
-
-        for (int i = 0; i < sb.length(); i += 2) {
-            if (i + 1 == sb.length()) {
-                sb.append('X');
-            } else if (sb.charAt(i) == sb.charAt(i + 1)) {
-                sb.insert(i + 1, 'X');
-            }
-        }
-
-        return codec(sb, 1);
-    }
-
-    private static String decode(String s) {
-        return codec(new StringBuilder(s), 4);
-    }
-
+class Main {
     public static void main(String[] args) {
-        String key = "mysecretkey";
-        String txt = "CRYPTOLABS";
-        boolean chgJtoI = true;
+        char[][] m = {
+            {'M','O','N','A','R'}, {'C','H','Y','B','D'},
+            {'E','F','G','I','K'}, {'L','P','Q','S','T'},
+            {'U','V','W','X','Z'}
+        };
 
-        createTbl(key, chgJtoI);
-        String enc = encode(prepareText(txt, chgJtoI));
+        String s = "INSTRUMENTS", p = "", enc = "", dec = "";
+        s = s.replace('J','I').toUpperCase();
 
-        System.out.println("Simulation of Playfair Cipher");
-        System.out.println("Input message   : " + txt);
-        System.out.println("Encoded message : " + enc);
-        System.out.println("Decoded message : " + decode(enc));
+        for (int i = 0; i < s.length(); i++) {
+            char a = s.charAt(i), b = i+1 < s.length() ? s.charAt(i+1) : 'X';
+            if (a == b) b = 'X';
+            else i++;
+            p += "" + a + b;
+        }
+
+        for (int i = 0; i < p.length(); i += 2) {
+            int r1=0,c1=0,r2=0,c2=0;
+            for(int r=0;r<5;r++) for(int c=0;c<5;c++) {
+                if(m[r][c]==p.charAt(i))   {r1=r;c1=c;}
+                if(m[r][c]==p.charAt(i+1)){r2=r;c2=c;}
+            }
+            if(r1==r2) enc += ""+m[r1][(c1+1)%5]+m[r2][(c2+1)%5];
+            else if(c1==c2) enc += ""+m[(r1+1)%5][c1]+m[(r2+1)%5][c2];
+            else enc += ""+m[r1][c2]+m[r2][c1];
+        }
+        System.out.println("Encrypted: " + enc);
+
+        for (int i = 0; i < enc.length(); i += 2) {
+            int r1=0,c1=0,r2=0,c2=0;
+            for(int r=0;r<5;r++) for(int c=0;c<5;c++) {
+                if(m[r][c]==enc.charAt(i))   {r1=r;c1=c;}
+                if(m[r][c]==enc.charAt(i+1)){r2=r;c2=c;}
+            }
+            if(r1==r2) dec += ""+m[r1][(c1+4)%5]+m[r2][(c2+4)%5];
+            else if(c1==c2) dec += ""+m[(r1+4)%5][c1]+m[(r2+4)%5][c2];
+            else dec += ""+m[r1][c2]+m[r2][c1];
+        }
+        System.out.println("Decrypted: " + dec);
     }
 }
