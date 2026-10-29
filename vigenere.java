@@ -1,41 +1,24 @@
-class VigenereCipher {
-    static String encode(String text, final String key) {
-        String res = "";
-        text = text.toUpperCase();
-        for (int i = 0, j = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c < 'A' || c > 'Z')
-                continue;
-
-            res += (char) ((c + key.charAt(j) - 2 * 'A') % 26 + 'A');
-            j = (j + 1) % key.length();
-        }
-        return res;
-    }
-
-    static String decode(String text, final String key) {
-        String res = "";
-        text = text.toUpperCase();
-        for (int i = 0, j = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c < 'A' || c > 'Z')
-                continue;
-
-            res += (char) ((c - key.charAt(j) + 26) % 26 + 'A');
-            j = (j + 1) % key.length();
-        }
-        return res;
-    }
-
+class Main {
     public static void main(String[] args) {
-        String key = "VIGENERECIPHER";
-        String msg = "SecurityLaboratory";
+        String s = "HELLO", key = "KEY";
+        String abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String enc = "";
 
-        System.out.println("Simulation of Vigenere Cipher");
-        System.out.println("Input message   : " + msg);
+        for (int i = 0; i < s.length(); i++) {
+            int a = abc.indexOf(s.charAt(i));
+            int b = abc.indexOf(key.charAt(i % key.length()));
+            enc += abc.charAt((a + b) % 26);
+        }
 
-        String enc = encode(msg, key);
-        System.out.println("Encoded message : " + enc);
-        System.out.println("Decoded message : " + decode(enc, key));
+        System.out.println("Encrypted: " + enc);
+
+        String dec = "";
+        for (int i = 0; i < enc.length(); i++) {
+            int a = abc.indexOf(enc.charAt(i));
+            int b = abc.indexOf(key.charAt(i % key.length()));
+            dec += abc.charAt((a - b + 26) % 26);
+        }
+
+        System.out.println("Decrypted: " + dec);
     }
 }
